@@ -362,9 +362,8 @@ export function useLiveKitRoom({
                     setStatus("disconnected");
                     setLocalVideoTrack(null);
                     setRemoteParticipants([]);
-                    if (onDisconnectedRef.current) {
-                        onDisconnectedRef.current();
-                    }
+                    // Note: Do not invoke onDisconnected here. Spontaneous WebRTC drops or token
+                    // rejections must not destroy the host's active 3D spatial classroom broadcast.
                 });
 
                 // Participant events

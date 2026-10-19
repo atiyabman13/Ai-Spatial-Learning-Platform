@@ -46,6 +46,7 @@ function TeacherDashboard() {
     const [connectedStudents, setConnectedStudents] = useState([]);
     const [broadcastTime, setBroadcastTime] = useState(0);
     const [showEndModal, setShowEndModal] = useState(false);
+    const isEndingSessionRef = useRef(false);
 
     // Live Broadcast timer
     useEffect(() => {
@@ -89,33 +90,41 @@ function TeacherDashboard() {
     }, [roomId]);
 
     const stopBroadcast = useCallback(async () => {
-        setIsBroadcasting(false);
-        setConnectedStudents([]);
+        if (isEndingSessionRef.current) return;
+        isEndingSessionRef.current = true;
+        isBroadcastingRef.current = false;
 
-        // 1. Send authenticated host-only request to end active classroom session in DB & LiveKit
         try {
-            const tokenToUse = token || localStorage.getItem("ai_spatial_token");
-            if (tokenToUse) {
-                await fetch(`${API_URL}/api/rtc/end-session`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${tokenToUse}`
-                    },
-                    body: JSON.stringify({ roomId })
-                });
+            setIsBroadcasting(false);
+            setConnectedStudents([]);
+
+            // 1. Send authenticated host-only request to end active classroom session in DB & LiveKit
+            try {
+                const tokenToUse = token || localStorage.getItem("ai_spatial_token");
+                if (tokenToUse) {
+                    await fetch(`${API_URL}/api/rtc/end-session`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${tokenToUse}`
+                        },
+                        body: JSON.stringify({ roomId })
+                    });
+                }
+            } catch (err) {
+                console.warn("Notice ending session via API:", err.message);
             }
-        } catch (err) {
-            console.warn("Notice ending session via API:", err.message);
-        }
 
-        // 2. Also notify via socket if connected
-        if (socket) {
-            socket.emit("teacher-end-session", { roomId });
-            socket.emit("leave-room", { roomId });
-        }
+            // 2. Also notify via socket if connected
+            if (socket) {
+                socket.emit("teacher-end-session", { roomId });
+                socket.emit("leave-room", { roomId });
+            }
 
-        toast("Broadcast ended and classroom session closed.", { icon: "🛑" });
+            toast("Broadcast ended and classroom session closed.", { icon: "🛑" });
+        } finally {
+            isEndingSessionRef.current = false;
+        }
     }, [socket, roomId, token]);
 
     // Safety unmount and beforeunload lifecycle cleanup for active broadcast
@@ -292,7 +301,6 @@ function TeacherDashboard() {
                         isActive={isBroadcasting}
                         isTeacher={true}
                         authToken={token}
-                        onLeave={stopBroadcast}
                     />
                 </div>
             )}
