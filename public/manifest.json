@@ -1,0 +1,17 @@
+{
+  "short_name": "SpatialHub",
+  "name": "Spatial Computing Platform for Remote Collaboration",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#060911",
+  "background_color": "#060911",
+  "orientation": "any"
+}

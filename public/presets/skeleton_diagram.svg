@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0f1d"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#070b14"/>
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="100%" height="100%" fill="url(#bgGrad)"/>
+  
+  <!-- Subtle Grid Lines -->
+  <g stroke="#1e293b" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.6">
+    <line x1="50" y1="0" x2="50" y2="600"/>
+    <line x1="200" y1="0" x2="200" y2="600"/>
+    <line x1="400" y1="0" x2="400" y2="600"/>
+    <line x1="600" y1="0" x2="600" y2="600"/>
+    <line x1="750" y1="0" x2="750" y2="600"/>
+    <line x1="0" y1="80" x2="800" y2="80"/>
+    <line x1="0" y1="200" x2="800" y2="200"/>
+    <line x1="0" y1="350" x2="800" y2="350"/>
+    <line x1="0" y1="500" x2="800" y2="500"/>
+  </g>
+
+  <!-- Header Banner -->
+  <rect x="30" y="20" width="740" height="52" rx="8" fill="rgba(30, 41, 59, 0.7)" stroke="#334155" stroke-width="1"/>
+  <text x="50" y="44" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="700" fill="#38bdf8">HUMAN SKELETAL SYSTEM</text>
+  <text x="50" y="62" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#94a3b8">Osteology • Axial &amp; Appendicular Skeletal Framework • 2D Textbook Schematic Reference</text>
+  <rect x="680" y="32" width="75" height="26" rx="13" fill="rgba(56, 189, 248, 0.15)" stroke="#38bdf8" stroke-width="1"/>
+  <text x="717" y="49" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#38bdf8" text-anchor="middle">TEXTBOOK</text>
+
+  <!-- Main Diagram Graphics -->
+  
+  <!-- Cranium Skull -->
+  <circle cx="400" cy="120" r="28" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+  <rect x="390" y="140" width="20" height="15" rx="3" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="260" y="125" font-family="'Segoe UI', sans-serif" font-size="13" font-weight="700" fill="#f8fafc">Cranium (Skull)</text>
+  <line x1="330" y1="125" x2="370" y2="125" stroke="#f8fafc" stroke-width="1.5"/>
+
+  <!-- Cervical Spine -->
+  <line x1="400" y1="155" x2="400" y2="185" stroke="#38bdf8" stroke-width="6"/>
+
+  <!-- Clavicles -->
+  <line x1="330" y1="185" x2="470" y2="185" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round"/>
+  <text x="500" y="185" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="600" fill="#e2e8f0">Clavicle</text>
+  <line x1="495" y1="185" x2="450" y2="185" stroke="#e2e8f0" stroke-width="1.5"/>
+
+  <!-- Sternum and Ribcage -->
+  <rect x="395" y="185" width="10" height="75" rx="2" fill="#f1f5f9"/>
+  <!-- Rib pairs -->
+  <path d="M 395,200 C 340,200 330,240 395,250 M 405,200 C 460,200 470,240 405,250" fill="none" stroke="#cbd5e1" stroke-width="3"/>
+  <path d="M 395,215 C 330,215 320,260 395,270 M 405,215 C 470,215 480,260 405,270" fill="none" stroke="#cbd5e1" stroke-width="3"/>
+  <path d="M 395,230 C 335,230 325,275 395,285 M 405,230 C 465,230 475,275 405,285" fill="none" stroke="#cbd5e1" stroke-width="3"/>
+  <text x="240" y="240" font-family="'Segoe UI', sans-serif" font-size="13" font-weight="700" fill="#cbd5e1">Ribcage &amp; Sternum</text>
+  <line x1="335" y1="240" x2="365" y2="240" stroke="#cbd5e1" stroke-width="1.5"/>
+
+  <!-- Vertebral Spine Column -->
+  <line x1="400" y1="260" x2="400" y2="330" stroke="#38bdf8" stroke-width="8" stroke-dasharray="6,2"/>
+  <text x="500" y="290" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="700" fill="#38bdf8">Spinal Column</text>
+  <line x1="495" y1="290" x2="410" y2="290" stroke="#38bdf8" stroke-width="1.5"/>
+
+  <!-- Arms (Humerus, Radius, Ulna) -->
+  <line x1="330" y1="185" x2="300" y2="270" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round"/>
+  <line x1="300" y1="270" x2="270" y2="340" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round"/>
+
+  <line x1="470" y1="185" x2="500" y2="270" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round"/>
+  <line x1="500" y1="270" x2="530" y2="340" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round"/>
+  <text x="540" y="260" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="600" fill="#e2e8f0">Humerus</text>
+  <text x="560" y="335" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="600" fill="#cbd5e1">Radius &amp; Ulna</text>
+
+  <!-- Pelvis -->
+  <path d="M 350,330 C 370,320 430,320 450,330 C 470,360 440,390 400,385 C 360,390 330,360 350,330 Z" fill="#94a3b8" stroke="#f1f5f9" stroke-width="3"/>
+  <text x="260" y="360" font-family="'Segoe UI', sans-serif" font-size="13" font-weight="700" fill="#f8fafc">Pelvic Girdle</text>
+  <line x1="335" y1="360" x2="360" y2="360" stroke="#f8fafc" stroke-width="1.5"/>
+
+  <!-- Legs (Femur, Patella, Tibia, Fibula) -->
+  <line x1="375" y1="380" x2="360" y2="465" stroke="#f1f5f9" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="360" cy="470" r="6" fill="#facc15"/>
+  <line x1="360" y1="475" x2="350" y2="550" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round"/>
+
+  <line x1="425" y1="380" x2="440" y2="465" stroke="#f1f5f9" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="440" cy="470" r="6" fill="#facc15"/>
+  <line x1="440" y1="475" x2="450" y2="550" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round"/>
+
+  <text x="500" y="430" font-family="'Segoe UI', sans-serif" font-size="13" font-weight="700" fill="#f1f5f9">Femur (Thigh Bone)</text>
+  <line x1="495" y1="430" x2="435" y2="430" stroke="#f1f5f9" stroke-width="1.5"/>
+
+  <text x="500" y="475" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="600" fill="#facc15">Patella (Kneecap)</text>
+  <line x1="495" y1="475" x2="450" y2="470" stroke="#facc15" stroke-width="1.5"/>
+
+  <text x="500" y="525" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="600" fill="#e2e8f0">Tibia &amp; Fibula</text>
+  <line x1="495" y1="525" x2="450" y2="520" stroke="#e2e8f0" stroke-width="1.5"/>
+
+
+  <!-- Footer Watermark / Standard Info -->
+  <line x1="30" y1="565" x2="770" y2="565" stroke="#334155" stroke-width="1" />
+  <text x="40" y="582" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#64748b">AI Spatial Learning Platform • Curated Educational Reference Series</text>
+  <text x="760" y="582" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#64748b" text-anchor="end">Standard Syllabus Geometry</text>
+</svg>

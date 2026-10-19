@@ -1,0 +1,9 @@
+{
+  "appId": "com.aispatial.medicalapp",
+  "appName": "Spatial Computing Platform for Remote Collaboration",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}
