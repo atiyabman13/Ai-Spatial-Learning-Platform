@@ -257,7 +257,7 @@ exports.getSessionStatus = async (req, res) => {
  * - Does not modify rooms or classroom sessions.
  * - Genuinely bounded request lifetime via SDK requestTimeout (5s) with native AbortSignal cancellation.
  * - Never returns or logs secrets, API keys, URLs, tokens, or request/response headers.
- * - Emits strictly allowlisted status: "SUCCESS", "AUTH_FAILED", "URL_OR_NETWORK_ERROR", "OTHER_FAILURE".
+ * - Emits strictly allowlisted status: "SUCCESS", "AUTH_MISSING_CREDENTIALS", "AUTH_INVALID_KEY_OR_SECRET", "AUTH_PERMISSION_DENIED", "URL_OR_NETWORK_ERROR", "OTHER_FAILURE".
  */
 exports.getLiveKitDiagnostic = async (req, res) => {
     // 1. Enforce Teacher Role strictly at controller level
@@ -282,7 +282,7 @@ exports.getLiveKitDiagnostic = async (req, res) => {
     if (!apiKey || !apiSecret) {
         return res.json({
             status: "success",
-            diagnosticResult: "AUTH_FAILED"
+            diagnosticResult: "AUTH_MISSING_CREDENTIALS"
         });
     }
 
@@ -304,9 +304,11 @@ exports.getLiveKitDiagnostic = async (req, res) => {
         const code = err?.code || err?.cause?.code;
         const name = err?.name || err?.cause?.name;
 
-        // Verified Authentication Failures (HTTP 401/403 or Twirp error codes)
-        if (status === 401 || code === "unauthenticated" || status === 403 || code === "permission_denied") {
-            diagnosticResult = "AUTH_FAILED";
+        // Verified Authentication Failures: distinguish invalid credentials from permission denial
+        if (status === 401 || code === "unauthenticated") {
+            diagnosticResult = "AUTH_INVALID_KEY_OR_SECRET";
+        } else if (status === 403 || code === "permission_denied") {
+            diagnosticResult = "AUTH_PERMISSION_DENIED";
         }
         // Verified URL and Network Transport Errors
         else if (
