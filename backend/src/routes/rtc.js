@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const { protect } = require("../middleware/authMiddleware");
+const { protect, authorize } = require("../middleware/authMiddleware");
 const {
     getLiveKitToken,
     endClassroomSession,
-    getSessionStatus
+    getSessionStatus,
+    getLiveKitDiagnostic
 } = require("../controllers/rtcController");
 
 /**
@@ -27,6 +28,13 @@ router.post("/end-session", protect, endClassroomSession);
  * @access  Private (Teacher or Student)
  */
 router.get("/session/:roomId", protect, getSessionStatus);
+
+/**
+ * @route   GET /api/rtc/diagnostic
+ * @desc    Temporary LiveKit credential and connectivity diagnostic (Read-only)
+ * @access  Private (Teacher only)
+ */
+router.get("/diagnostic", protect, authorize("teacher"), getLiveKitDiagnostic);
 
 module.exports = router;
 

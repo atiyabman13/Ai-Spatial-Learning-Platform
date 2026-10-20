@@ -245,3 +245,97 @@ exports.getSessionStatus = async (req, res) => {
         });
     }
 };
+
+/**
+ * Temporary LiveKit Credential & Connectivity Diagnostic (Read-only)
+ * GET /api/rtc/diagnostic
+ *
+ * Access: Authenticated Teacher Only
+ *
+ * Safety constraints:
+ * - Executes non-destructive RoomServiceClient.listRooms() call.
+ * - Does not modify rooms or classroom sessions.
+ * - Genuinely bounded request lifetime via SDK requestTimeout (5s) with native AbortSignal cancellation.
+ * - Never returns or logs secrets, API keys, URLs, tokens, or request/response headers.
+ * - Emits strictly allowlisted status: "SUCCESS", "AUTH_FAILED", "URL_OR_NETWORK_ERROR", "OTHER_FAILURE".
+ */
+exports.getLiveKitDiagnostic = async (req, res) => {
+    // 1. Enforce Teacher Role strictly at controller level
+    if (req.user?.role !== "teacher") {
+        return res.status(403).json({
+            message: "Forbidden: Only authorized teachers can access RTC diagnostics."
+        });
+    }
+
+    // 2. Validate configuration existence with explicit classification
+    const livekitUrl = (process.env.LIVEKIT_URL || "").trim();
+    const apiKey = (process.env.LIVEKIT_API_KEY || "").trim();
+    const apiSecret = (process.env.LIVEKIT_API_SECRET || "").trim();
+
+    if (!livekitUrl) {
+        return res.json({
+            status: "success",
+            diagnosticResult: "URL_OR_NETWORK_ERROR"
+        });
+    }
+
+    if (!apiKey || !apiSecret) {
+        return res.json({
+            status: "success",
+            diagnosticResult: "AUTH_FAILED"
+        });
+    }
+
+    let diagnosticResult = "OTHER_FAILURE";
+
+    try {
+        // Instantiate RoomServiceClient with verified SDK options:
+        // - requestTimeout: 5 (seconds) directly sets AbortSignal.timeout(5000) on fetch, actively cancelling hung requests.
+        // - failover: false disables cross-region retries, guaranteeing a single attempt and strict bounded lifetime.
+        const roomService = new RoomServiceClient(livekitUrl, apiKey, apiSecret, {
+            requestTimeout: 5,
+            failover: false
+        });
+
+        await roomService.listRooms();
+        diagnosticResult = "SUCCESS";
+    } catch (err) {
+        const status = err?.status;
+        const code = err?.code || err?.cause?.code;
+        const name = err?.name || err?.cause?.name;
+
+        // Verified Authentication Failures (HTTP 401/403 or Twirp error codes)
+        if (status === 401 || code === "unauthenticated" || status === 403 || code === "permission_denied") {
+            diagnosticResult = "AUTH_FAILED";
+        }
+        // Verified URL and Network Transport Errors
+        else if (
+            code === "ERR_INVALID_URL" ||
+            code === "ENOTFOUND" ||
+            code === "ECONNREFUSED" ||
+            code === "ECONNRESET" ||
+            code === "ETIMEDOUT" ||
+            code === "CERT_HAS_EXPIRED" ||
+            code === "UNABLE_TO_VERIFY_LEAF_SIGNATURE" ||
+            code === "DEPTH_ZERO_SELF_SIGNED_CERT" ||
+            name === "TimeoutError" ||
+            name === "AbortError" ||
+            name === "FetchError" ||
+            (typeof code === "string" && code.startsWith("ERR_TLS_"))
+        ) {
+            diagnosticResult = "URL_OR_NETWORK_ERROR";
+        }
+        // Ambiguous, internal, or other unexpected errors fall through to OTHER_FAILURE
+        else {
+            diagnosticResult = "OTHER_FAILURE";
+        }
+    }
+
+    // Log only the allowlisted result token (no sensitive data or errors)
+    console.log("[LiveKit Diagnostic] Completed check with outcome:", diagnosticResult);
+
+    return res.json({
+        status: "success",
+        diagnosticResult
+    });
+};
