@@ -26,7 +26,7 @@ The platform combines 3D visualization, real-time collaboration and AI-assisted 
 - Biology content aimed at school students in Classes 6-12.
 
 ### 🤖 AI-Assisted Learning
-- AI assistant for doubt solving and explanations, built on the Google Gemini SDK (`@google/genai`).
+- AI assistant for doubt solving and explanations, powered by Grok (xAI).
 - Document support: PDF viewing (`react-pdf`, `pdfjs-dist`) and OCR from images (`tesseract.js`).
 
 ### 🔐 Authentication and Administration
@@ -42,7 +42,7 @@ The platform combines 3D visualization, real-time collaboration and AI-assisted 
 | Backend | Node.js, Express.js |
 | Real-time | Socket.IO, LiveKit |
 | Database | MongoDB (Atlas or local) |
-| AI | Google Gemini (`@google/genai`) |
+| AI | Grok (xAI API) |
 | Auth and services | JWT, Firebase SDK |
 | Deployment | Vercel (frontend), Render (backend), Docker + Nginx |
 | Mobile packaging | Capacitor (config included) |
@@ -60,7 +60,7 @@ The platform combines 3D visualization, real-time collaboration and AI-assisted 
           |                     |
           v                     v
    3D Visualization        AI Assistant
-   Three.js / R3F          Gemini API
+   Three.js / R3F          Grok API
           |                     |
           +----------+----------+
                      |
@@ -80,7 +80,7 @@ The platform combines 3D visualization, real-time collaboration and AI-assisted 
 - Node.js and npm
 - Git
 - A MongoDB Atlas account or a local MongoDB instance
-- Gemini API key (for AI features)
+- Grok (xAI) API key (for AI features)
 - LiveKit credentials (for real-time communication)
 - Docker and Docker Compose (optional, for the containerized setup)
 
