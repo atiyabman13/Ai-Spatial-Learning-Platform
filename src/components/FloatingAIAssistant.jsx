@@ -1,11 +1,9 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../context/AuthContext";
-import { queryLocalKnowledge } from "../services/localKnowledgeEngine";
+import { askAssistant } from "../services/aiClient";
 import FormattedMessage, { stripFormattingForSpeech } from "./FormattedMessage";
 import toast from "react-hot-toast";
-import axios from "axios";
-import { API_URL } from "../config/api";
 import {
     FaRobot,
     FaTimes,
@@ -105,7 +103,7 @@ export default function FloatingAIAssistant() {
         recognition.start();
     };
 
-    const handleSend = async (customQuery = null) => {
+       const handleSend = async (customQuery = null) => {
         const queryText = (customQuery || input).trim();
         if (!queryText || loading) return;
 
@@ -120,29 +118,17 @@ export default function FloatingAIAssistant() {
         setLoading(true);
 
         try {
-            let answerText = "";
-
-            // Determine if quiz or case study requested
             const isQuizMode = queryText.includes("Quiz") || queryText.includes("quiz");
             const isCaseMode = queryText.includes("Case Study") || queryText.includes("case study");
 
-            try {
-                const endpoint = isQuizMode ? "/api/ai/quiz" : isCaseMode ? "/api/ai/case-study" : "/api/ai/ask";
-                const res = await axios.post(`${API_URL}${endpoint}`, {
-                    question: queryText,
-                    context: {
-                        activeModel: "Heart",
-                        history: messages.slice(-4).map(m => ({ role: m.sender === "user" ? "user" : "assistant", content: m.text }))
-                    },
-                    mode: isQuizMode ? "quiz" : isCaseMode ? "case_study" : "chat"
-                }, { timeout: 3500 });
-
-                answerText = res.data.answer;
-            } catch (err) {
-                // Direct fallback to client Local Knowledge Engine
-                const local = queryLocalKnowledge(queryText);
-                answerText = local.answer;
-            }
+            const res = await askAssistant({
+                question: queryText,
+                messages,
+                mode: isQuizMode ? "quiz" : isCaseMode ? "case_study" : "chat",
+                role: user?.role || "student"
+            });
+            const answerText = res.answer;
+            if (res.offline) toast("Server unreachable - answered offline.", { icon: "📴" });
 
             const aiMsg = {
                 id: Date.now() + 1,

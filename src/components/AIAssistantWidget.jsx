@@ -1,16 +1,11 @@
 import { useState, useRef, useEffect } from "react";
-import axios from "axios";
-import { API_URL } from "../config/api";
-import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import { queryLocalKnowledge } from "../services/localKnowledgeEngine";
+import { askAssistant } from "../services/aiClient";
 import {
     FaRobot,
     FaPaperPlane,
     FaSpinner,
-    FaLightbulb,
     FaUser,
-    FaCube,
     FaVolumeUp,
     FaVolumeMute,
     FaCopy,
@@ -19,11 +14,9 @@ import {
     FaHeart,
     FaEye,
     FaBone,
-    FaNotesMedical,
     FaQuestionCircle,
     FaTrashAlt,
     FaStethoscope,
-    FaCog,
     FaMicrophone,
     FaMicrophoneSlash,
     FaAtom,
@@ -36,19 +29,19 @@ import FormattedMessage, { stripFormattingForSpeech } from "./FormattedMessage";
 export default function AIAssistantWidget({ initialQuestion = "", selectedPart = null, activeModel: propModel = "Heart" }) {
     const [question, setQuestion] = useState(initialQuestion);
     const [activeModel, setActiveModel] = useState(propModel);
-    const [provider, setProvider] = useState("Local Knowledge Engine");
+    const [provider, setProvider] = useState("AI Tutor");
     const [messages, setMessages] = useState([
         {
             id: 1,
             sender: "ai",
-            text: "👋 **Welcome to the AI Assistant!**\n\nPowered by the **Local Knowledge Engine** for offline educational exploration in **Biology, Physics, and Chemistry**.\n\n• Ask ANY question (cells, photosynthesis, Newton's laws, Ohm's law, balancing equations).\n• Select any scientific model context above.\n• Click **`📝 Generate 3D Quiz`** or **`🩺 Clinical Case`** for lesson activities!"
+            text: "👋 **Welcome to the AI Assistant!**\n\nAsk about **Biology, Physics, and Chemistry**.\n\n• Ask ANY question (cells, photosynthesis, Newton's laws, Ohm's law, balancing equations).\n• Select any scientific model context above.\n• Click **`📝 Generate 3D Quiz`** or **`🩺 Clinical Case`** for lesson activities!"
         }
     ]);
     const [loading, setLoading] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [copiedId, setCopiedId] = useState(null);
-    const [activeMode, setActiveMode] = useState("chat"); // "chat" | "quiz" | "case_study"
+    const [activeMode] = useState("chat"); // "chat" | "quiz" | "case_study"
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
@@ -168,35 +161,21 @@ export default function AIAssistantWidget({ initialQuestion = "", selectedPart =
         setLoading(true);
 
         try {
-            let answerText = "";
-            let answerProvider = "Local Knowledge Engine";
+            const res = await askAssistant({
+                question: queryText,
+                messages,
+                activeModel,
+                selectedPart: selectedPart ? selectedPart.name : null,
+                mode: currentMode,
+                role: "teacher"
+            });
 
-            try {
-                const endpoint = currentMode === "quiz" ? "/api/ai/quiz" : currentMode === "case_study" ? "/api/ai/case-study" : "/api/ai/ask";
-                const response = await axios.post(`${API_URL}${endpoint}`, {
-                    question: queryText,
-                    context: {
-                        activeModel,
-                        selectedPart: selectedPart ? selectedPart.name : null,
-                        history: messages.slice(-6).map(m => ({ role: m.sender === "user" ? "user" : "assistant", content: m.text }))
-                    },
-                    mode: currentMode
-                }, { timeout: 4000 });
-
-                answerText = response.data.answer;
-                if (response.data.provider) answerProvider = response.data.provider;
-            } catch (netErr) {
-                // Fall back directly to client-side local knowledge engine
-                const localRes = queryLocalKnowledge(queryText, { activeModel });
-                answerText = localRes.answer;
-            }
-
-            setProvider(answerProvider);
+            setProvider(res.provider);
 
             const aiMsg = {
                 id: Date.now() + 1,
                 sender: "ai",
-                text: answerText
+                text: res.answer
             };
             setMessages((prev) => [...prev, aiMsg]);
         } catch (error) {
@@ -243,7 +222,7 @@ export default function AIAssistantWidget({ initialQuestion = "", selectedPart =
             {
                 id: Date.now(),
                 sender: "ai",
-                text: "✨ Chat cleared. How can the Local Knowledge Engine assist your learning or lesson planning?"
+                text: "✨ Chat cleared. How can I help with your learning or lesson planning?"
             }
         ]);
         toast("Chat history reset", { icon: "🧹" });
@@ -258,7 +237,7 @@ export default function AIAssistantWidget({ initialQuestion = "", selectedPart =
                         <FaRobot style={{ color: "var(--accent-cyan)" }} /> AI Educational Assistant
                     </h3>
                     <div style={{ fontSize: "0.74rem", color: "var(--accent-purple)", fontWeight: "600", marginTop: "2px" }}>
-                        ⚡ {provider} • Offline Mode
+                        ⚡ {provider}
                     </div>
                 </div>
 
@@ -386,7 +365,7 @@ export default function AIAssistantWidget({ initialQuestion = "", selectedPart =
 
                 {loading && (
                     <div style={{ alignSelf: "flex-start", padding: "10px 14px", borderRadius: "14px", background: "rgba(30, 41, 59, 0.8)", color: "var(--text-secondary)", fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "8px" }}>
-                        <FaSpinner className="spin" style={{ color: "var(--accent-cyan)" }} /> Processing query with Local Knowledge Engine...
+                        <FaSpinner className="spin" style={{ color: "var(--accent-cyan)" }} /> Thinking...
                     </div>
                 )}
                 <div ref={messagesEndRef} />

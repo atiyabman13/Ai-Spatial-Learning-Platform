@@ -3,62 +3,98 @@ const {
     generateOfflineQuiz,
     generateOfflineClinicalCase
 } = require("./localKnowledgeEngine");
+const llm = require("./llmClient");
 
-/**
- * AI Assistant Module - Powered strictly by the offline Local Knowledge Engine.
- * 
- * Complies with strict non-negotiable requirements:
- * - No external AI cloud calls (no Gemini, no OpenAI).
- * - No API keys required.
- * - Truthfully identifies provider as "Local Knowledge Engine".
- */
-async function askAI(question, context = {}, mode = "chat", customApiKey = null) {
-    const { activeModel = "Heart", selectedPart = null, history = [] } = context;
+const MAX_HISTORY = 12;
+const MAX_MESSAGE_CHARS = 4000;
+
+function buildSystemPrompt({ activeModel, selectedPart, role }) {
+    const lines = [
+        "You are the AI Study Assistant of the AI Spatial Learning Platform, a 3D learning app for school students (Classes 6-12) covering Biology, Physics and Chemistry.",
+        "Teach step by step in simple language, with a short example or analogy where it helps.",
+        "Use Markdown: short paragraphs, bullet points, and **bold** for key terms. Write formulas in plain text or simple LaTeX like $F = ma$.",
+        "Keep answers focused (usually under 250 words) unless the student asks for more depth.",
+        "If you are not sure of a fact, say so instead of guessing. Never invent data.",
+        "If the question is unrelated to science or studying, politely steer the student back to learning.",
+        "End with one short follow-up question or suggestion only when it genuinely helps."
+    ];
+    if (role === "teacher") {
+        lines.push("The user is a teacher: you may suggest quiz questions, classroom activities and ways to use the 3D models.");
+    }
+    if (activeModel) {
+        lines.push(`The student is currently viewing the 3D model: "${activeModel}".`);
+    }
+    if (selectedPart) {
+        lines.push(`They have selected the part: "${selectedPart}". Prefer explanations about this part when the question is ambiguous.`);
+    }
+    return lines.join("\n");
+}
+
+function sanitizeHistory(history) {
+    if (!Array.isArray(history)) return [];
+    return history
+        .map((m) => ({
+            role: m?.role === "assistant" || m?.sender === "ai" ? "assistant" : "user",
+            content: typeof (m?.content ?? m?.text) === "string" ? (m.content ?? m.text) : ""
+        }))
+        .filter((m) => m.content.trim())
+        .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_MESSAGE_CHARS) }))
+        .slice(-MAX_HISTORY);
+}
+
+async function askAI(question, context = {}, mode = "chat", _ignoredKey = null) {
+    const { activeModel = null, selectedPart = null, history = [], role = "student" } = context || {};
+
+    if (mode === "quiz") {
+        const quiz = generateOfflineQuiz(activeModel || "Heart", selectedPart);
+        return { answer: quiz.answer, provider: "Local Knowledge Engine", mode, model: activeModel };
+    }
+    if (mode === "case_study") {
+        return {
+            answer: generateOfflineClinicalCase(activeModel || "Heart", selectedPart),
+            provider: "Local Knowledge Engine",
+            mode,
+            model: activeModel
+        };
+    }
+
+    const cleanHistory = sanitizeHistory(history);
+    const q = String(question || "").slice(0, MAX_MESSAGE_CHARS);
+
+    let local = null;
+    try {
+        local = queryKnowledgeEngine(q, { history: cleanHistory, activeModel, selectedPart });
+    } catch (e) {
+        console.error("Local engine error:", e.message);
+    }
 
     try {
-        if (mode === "quiz") {
-            const quizRes = generateOfflineQuiz(activeModel, selectedPart);
-            return {
-                answer: quizRes.answer,
-                provider: "Local Knowledge Engine",
-                mode: "quiz",
-                model: activeModel
-            };
-        }
+        const last = cleanHistory[cleanHistory.length - 1];
+        const turns = last && last.role === "user" && last.content === q ? cleanHistory : [...cleanHistory, { role: "user", content: q }];
 
-        if (mode === "case_study") {
-            const caseRes = generateOfflineClinicalCase(activeModel, selectedPart);
-            return {
-                answer: caseRes,
-                provider: "Local Knowledge Engine",
-                mode: "case_study",
-                model: activeModel
-            };
-        }
-
-        // Standard Q&A mode
-        const result = queryKnowledgeEngine(question, {
-            history,
-            activeModel,
-            selectedPart
-        });
-
+        const answer = await llm.complete(
+            [{ role: "system", content: buildSystemPrompt({ activeModel, selectedPart, role }) }, ...turns]
+        );
         return {
-            answer: result.answer,
-            provider: "Local Knowledge Engine",
-            actionCue: result.actionCue || null,
-            modelName: result.modelName || activeModel,
-            found: result.found,
-            topic: result.topic
+            answer,
+            provider: `AI Tutor (${llm.MODEL})`,
+            actionCue: local?.actionCue || null,
+            modelName: local?.modelName || activeModel,
+            fallback: false
         };
     } catch (err) {
-        console.error("Local Knowledge Engine resolution notice:", err.message);
+        console.error("LLM request failed, using offline engine:", err.code || err.message);
         return {
-            answer: "An error occurred in the Local Knowledge Engine. Please rephrase your science question.",
+            answer: local?.answer || "Sorry, I couldn't answer that right now. Please try again in a moment.",
             provider: "Local Knowledge Engine",
-            error: true
+            actionCue: local?.actionCue || null,
+            modelName: local?.modelName || activeModel,
+            fallback: true,
+            reason: err.code === "LLM_NOT_CONFIGURED" ? "llm_not_configured" : "llm_unavailable"
         };
     }
 }
 
 module.exports = askAI;
+module.exports.buildSystemPrompt = buildSystemPrompt;
+module.exports.sanitizeHistory = sanitizeHistory;

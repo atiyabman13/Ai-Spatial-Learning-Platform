@@ -6,7 +6,7 @@
  * Requires NO API keys or external network requests.
  */
 
-import { queryLocalKnowledge } from "./localKnowledgeEngine";
+import { askAssistant } from "./aiClient";
 
 /**
  * Obsolete key helpers maintained for backward compatibility.
@@ -31,23 +31,22 @@ export async function analyzeDiagramImage(base64Image, userPrompt = "", customKe
  * Answer Student Doubt with Contextual 3D Model Action Cues
  */
 export async function clearStudentDoubt(question, activeChapter = null, activePart = null, historyOrKey = []) {
-    const history = Array.isArray(historyOrKey) ? historyOrKey : [];
+    const messages = Array.isArray(historyOrKey) ? historyOrKey : [];
     const activeModel = activeChapter?.modelName || null;
 
-    // Query verified Local Knowledge Engine with optional conversational history and explicit model
-    const knowledgeResult = queryLocalKnowledge(question, {
+    const res = await askAssistant({
+        question,
+        messages,
         activeModel,
-        selectedPart: activePart,
-        history
+        selectedPart: typeof activePart === "string" ? activePart : activePart?.name || null
     });
 
-    let actionCue = knowledgeResult.actionCue;
+    let actionCue = res.actionCue;
 
-    // If no specific action cue came from the topic, check if activePart or modelName matches
     if (!actionCue) {
         if (activePart) {
             actionCue = {
-                targetMesh: activePart,
+                targetMesh: typeof activePart === "string" ? activePart : activePart?.name,
                 highlightColor: "#00ffcc",
                 cameraPosition: [0, 0.5, 3.2],
                 zoom: 1.4,
@@ -67,12 +66,11 @@ export async function clearStudentDoubt(question, activeChapter = null, activePa
     }
 
     return {
-        answerText: knowledgeResult.answer,
+        answerText: res.answer,
         action: actionCue || null,
-        provider: "Local Knowledge Engine"
+        provider: res.provider
     };
 }
-
 /**
  * Offline Diagram Parsing Pipeline
  */
