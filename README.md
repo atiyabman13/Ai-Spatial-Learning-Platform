@@ -87,8 +87,8 @@ The application runs in a web browser on compatible desktop and mobile devices, 
 
 ## 🚀 Live Application
 
-- **Frontend:** https://ai-spatial-learning-platform-rcvv.vercel.app/
-- **Backend:** https://ai-spatial-learning-backend.onrender.com
+- **Frontend:**[ https://ai-spatial-learning-platform-rcvv.vercel.app/](https://ai-spatial-learning-platform-fcjj.onrender.com)
+- **Backend:** https://ai-spatial-learning-platform-2.onrender.com/
 
 The frontend and backend are deployed separately. Some features may require valid service configuration and environment variables.
 
