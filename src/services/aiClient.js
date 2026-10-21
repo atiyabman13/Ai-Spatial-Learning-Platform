@@ -2,10 +2,11 @@ import axios from "axios";
 import { API_URL } from "../config/api";
 import { queryLocalKnowledge } from "./localKnowledgeEngine";
 
-const REQUEST_TIMEOUT_MS = 60000; // long enough for a sleeping Render server to wake up
+const REQUEST_TIMEOUT_MS = 60000; // sleeping Render server ko wake hone ka time
 
+// FIX: backend me route /api/ai/ask hai, /api/ai/chat nahi
 const ENDPOINTS = {
-    chat: "/api/ai/chat",
+    chat: "/api/ai/ask",
     quiz: "/api/ai/quiz",
     case_study: "/api/ai/case-study"
 };
@@ -33,9 +34,17 @@ export async function askAssistant({
     try {
         const { data } = await axios.post(
             `${API_URL}${ENDPOINTS[mode] || ENDPOINTS.chat}`,
-            { question, mode, context: { activeModel, selectedPart, role, history } },
+            {
+                question,
+                mode,
+                // quiz/case-study routes ye fields top-level pe padhte hain
+                activeModel,
+                selectedPart,
+                context: { activeModel, selectedPart, role, history }
+            },
             { timeout: REQUEST_TIMEOUT_MS }
         );
+
         return {
             answer: data.answer,
             provider: data.provider || "AI Tutor",
@@ -44,12 +53,23 @@ export async function askAssistant({
             fallback: Boolean(data.fallback)
         };
     } catch (err) {
-        console.warn("AI backend unreachable, using offline engine:", err.message);
+        // Ab status code dikhega (404, 500, network error, etc.)
+        console.warn(
+            "AI backend error, using offline engine:",
+            err.response?.status || "no-response",
+            err.response?.data || err.message
+        );
+
         const local = queryLocalKnowledge(question, {
             activeModel,
             selectedPart,
-            history: history.map((h) => ({ role: h.role, sender: h.role === "assistant" ? "ai" : "user", text: h.content }))
+            history: history.map((h) => ({
+                role: h.role,
+                sender: h.role === "assistant" ? "ai" : "user",
+                text: h.content
+            }))
         });
+
         return {
             answer: local.answer,
             provider: "Local Knowledge Engine (offline)",
