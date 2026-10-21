@@ -1,67 +1,56 @@
 # AI Spatial Learning Platform
 
-An interactive, web-based spatial learning and remote collaboration platform that enables students and teachers to explore 3D models, learn complex concepts visually, and collaborate in a shared virtual environment — without requiring a VR headset.
+An interactive, web-based spatial learning and remote collaboration platform that lets students and teachers explore 3D models, learn complex concepts visually, and collaborate in a shared virtual environment, without needing a VR headset.
 
-**Live Demo:** [Open AI Spatial Learning Platform](https://ai-spatial-learning-platform-rcvv.vercel.app/)  
-**GitHub Repository:** [Ai-Spatial-Learning-Platform](https://github.com/atiyabman13/Ai-Spatial-Learning-Platform)
+**Live Demo:** [Open AI Spatial Learning Platform](https://ai-spatial-learning-platform-rcvv.vercel.app/)
+**Backend API:** [ai-spatial-learning-backend.onrender.com](https://ai-spatial-learning-backend.onrender.com)
 
 ---
 
-## 📌 Project Overview
+## 📌 Overview
 
-The AI Spatial Learning Platform combines 3D visualization, collaborative learning, and AI-assisted educational support in a single web application.
+The platform combines 3D visualization, real-time collaboration and AI-assisted learning in one web application. Students can explore anatomy and biology models, while teachers can run collaborative sessions through dedicated portals. It runs in the browser on desktop and mobile.
 
-The platform is designed to make complex concepts easier to understand through interactive 3D models and shared learning experiences. Students can explore anatomical structures and biology topics, while teachers can support learning through dedicated portals and collaborative sessions.
-
-The application runs in a web browser on compatible desktop and mobile devices, reducing the need for specialized VR hardware.
-
-## ✨ Key Features
+## ✨ Features
 
 ### 🧠 Interactive 3D Visualization
-- Explore 3D anatomical and educational models directly in the browser.
-- Rotate, zoom, and inspect models to understand their structures.
-- View labeled anatomical parts to support visual learning.
-- Explore educational models such as the heart, brain, respiratory system, eye, skeleton, digestive system, plant cell, DNA, and mitosis.
+- Explore 3D educational models in the browser: heart, brain, respiratory system, eye, skeleton, digestive system, plant cell, DNA and mitosis.
+- Rotate, zoom and inspect models, with labeled anatomical parts.
 
-### 🤝 Real-Time Remote Collaboration
-- Support collaborative learning sessions for multiple users.
-- Synchronize supported 3D model interactions, including rotation and zoom.
-- Enable real-time communication using LiveKit.
-- Facilitate remote learning without requiring a VR headset.
+### 🤝 Real-Time Collaboration
+- Multi-user sessions with synchronized model interaction (rotation, zoom) over Socket.IO.
+- Live audio/video communication using LiveKit.
 
 ### 🎓 Student and Teacher Portals
-- Role-based student and teacher experiences.
-- Dedicated dashboards for learning and classroom activities.
-- Biology learning content designed for school students in Classes 6–12.
-- Interactive exploration of educational models and topics.
+- Role-based dashboards for students and teachers.
+- Biology content aimed at school students in Classes 6-12.
 
 ### 🤖 AI-Assisted Learning
-- AI assistant for educational questions and learning support.
-- Context-aware assistance for relevant biology learning content.
-- Integration points for AI-powered explanations and doubt solving.
+- AI assistant for doubt solving and explanations, built on the Google Gemini SDK (`@google/genai`).
+- Document support: PDF viewing (`react-pdf`, `pdfjs-dist`) and OCR from images (`tesseract.js`).
 
 ### 🔐 Authentication and Administration
-- User authentication and protected application areas.
-- Dedicated administrative functionality.
-- Backend services for application data and user-related operations.
+- User authentication and protected routes.
+- Admin functionality and backend services for user and application data.
 
 ## 🛠️ Tech Stack
 
 | Layer | Technologies |
 |---|---|
-| Frontend | React, Vite, JavaScript |
-| 3D Visualization | Three.js, WebGL |
+| Frontend | React 19, Vite, React Router, Framer Motion |
+| 3D | Three.js, React Three Fiber, Drei |
 | Backend | Node.js, Express.js |
-| Real-Time Communication | Socket.IO, LiveKit |
-| Database | MongoDB, MongoDB Atlas |
-| AI Integration | AI API integration |
-| Authentication | JWT-based authentication |
-| Deployment | Vercel, Render |
-| Development Tools | VS Code, Git, GitHub |
+| Real-time | Socket.IO, LiveKit |
+| Database | MongoDB (Atlas or local) |
+| AI | Google Gemini (`@google/genai`) |
+| Auth and services | JWT, Firebase SDK |
+| Deployment | Vercel (frontend), Render (backend), Docker + Nginx |
+| Mobile packaging | Capacitor (config included) |
+| Tooling | ESLint, Git, GitHub |
 
-## 🏗️ System Architecture
+## 🏗️ Architecture
 
-```text
+```
              Student / Teacher
                      |
                      v
@@ -71,7 +60,7 @@ The application runs in a web browser on compatible desktop and mobile devices, 
           |                     |
           v                     v
    3D Visualization        AI Assistant
-   Three.js / WebGL        AI Integration
+   Three.js / R3F          Gemini API
           |                     |
           +----------+----------+
                      |
@@ -82,122 +71,122 @@ The application runs in a web browser on compatible desktop and mobile devices, 
           |                     |
           v                     v
        MongoDB          Real-Time Services
-                         Socket.IO / LiveKit
+                        Socket.IO / LiveKit
 ```
-
-## 🚀 Live Application
-
-- **Frontend:**[ https://ai-spatial-learning-platform-rcvv.vercel.app/](https://ai-spatial-learning-platform-fcjj.onrender.com)
-- **Backend:** https://ai-spatial-learning-platform-2.onrender.com/
-
-The frontend and backend are deployed separately. Some features may require valid service configuration and environment variables.
 
 ## 💻 Getting Started
 
 ### Prerequisites
-
-Install the following before running the project locally:
-
 - Node.js and npm
 - Git
-- MongoDB Atlas account or a local MongoDB instance
-- Required AI API credentials, if using AI-powered features
-- LiveKit credentials, if using real-time communication
+- A MongoDB Atlas account or a local MongoDB instance
+- Gemini API key (for AI features)
+- LiveKit credentials (for real-time communication)
+- Docker and Docker Compose (optional, for the containerized setup)
 
-### 1. Clone the Repository
+### Option A: Run locally
 
+**1. Clone the repository**
 ```bash
 git clone https://github.com/atiyabman13/Ai-Spatial-Learning-Platform.git
 cd Ai-Spatial-Learning-Platform
 ```
 
-### 2. Install Frontend Dependencies
-
+**2. Install frontend dependencies**
 ```bash
 npm install
 ```
 
-### 3. Configure the Backend
-
+**3. Set up the backend**
 ```bash
 cd backend
 npm install
 ```
-
-Create a local `.env` file in the backend directory using the environment variables required by the application.
-
-Typical configuration may include:
-
-```env
+Create a `.env` file in `backend/`:
+```
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_private_jwt_secret
 ```
+Add your AI and LiveKit variables as required. Never commit real secrets.
 
-Configure any additional AI and LiveKit variables required by the relevant features. Use your own credentials and never commit real secrets to GitHub.
-
-### 4. Start the Backend
-
-From the `backend` directory, run the start script defined in `backend/package.json`, for example:
-
+**4. Start the backend** (from `backend/`)
 ```bash
 npm start
 ```
+If your backend uses a different script, check `backend/package.json`.
 
-If the project uses a different backend start script, follow the available scripts in `backend/package.json`.
-
-### 5. Start the Frontend
-
-Open a second terminal in the project root:
-
+**5. Start the frontend** (from the project root, in a second terminal)
 ```bash
 npm run dev
 ```
+Open the local URL that Vite prints.
 
-Open the local URL printed by Vite in your terminal.
+### Option B: Run with Docker
 
-> **Note:** Local setup may require additional environment variables or service configuration. Check the project configuration and deployment settings for the complete requirements.
+`docker-compose.yml` starts three services:
+
+| Service | Description | Port |
+|---|---|---|
+| `mongodb` | MongoDB 7 with a persistent volume | 27017 |
+| `backend` | Express + Socket.IO API | 5000 |
+| `frontend` | Nginx serving the built app and proxying to the backend | 80 |
+
+```bash
+docker compose up --build
+```
+Then open `http://localhost`. Set `JWT_SECRET` and any other secrets via your own environment or an env file; do not use the placeholder values in production.
+
+### Frontend scripts
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start the Vite dev server |
+| `npm run build` | Create a production build in `dist/` |
+| `npm run preview` | Preview the production build locally |
+| `npm run lint` | Run ESLint |
+
+## 📱 Mobile (Capacitor)
+
+`capacitor.config.json` is set up to wrap the built web app (`dist/`) as a mobile app. To use it, install the Capacitor packages, run `npm run build`, then sync and open the native project with the Capacitor CLI.
 
 ## 📂 Project Structure
 
-```text
+```
 Ai-Spatial-Learning-Platform/
-├── backend/             # Express backend and API routes
-├── public/              # Public assets and 3D model assets
-├── src/
-│   ├── components/      # Reusable React components
-│   ├── pages/           # Application pages
-│   ├── services/        # AI and application services
-│   └── three/           # 3D visualization components and models
-├── docker-compose.yml   # Local multi-service configuration
-├── package.json         # Frontend dependencies and scripts
-└── README.md
+├── backend/               # Express backend, API routes, Socket.IO
+├── public/                # Static assets and 3D model files
+├── src/                   # React frontend (components, pages, services, 3D)
+├── test_samples/          # Sample files for testing
+├── Dockerfile             # Frontend image (build + Nginx)
+├── docker-compose.yml     # MongoDB + backend + frontend
+├── nginx.conf             # Nginx configuration
+├── capacitor.config.json  # Mobile packaging config
+├── vercel.json            # Vercel deployment config
+├── vite.config.js         # Vite config
+├── eslint.config.js       # ESLint config
+└── package.json           # Frontend dependencies and scripts
 ```
 
-*This is a high-level overview; exact files and folders may vary with the current implementation.*
-
-## 🎯 Project Objectives
+## 🎯 Objectives
 
 - Make complex biological and spatial concepts easier to understand through 3D visualization.
-- Enable collaborative learning from different locations.
-- Provide accessible browser-based educational experiences.
-- Integrate AI-assisted learning support into educational workflows.
-- Reduce dependence on specialized VR equipment.
+- Enable collaborative learning across locations.
+- Provide accessible, browser-based education without specialized VR hardware.
+- Integrate AI-assisted learning support into the classroom workflow.
 
 ## 🔮 Future Enhancements
 
-- Expand the collection of interactive educational models.
-- Improve AI-generated explanations and contextual learning assistance.
-- Add more classroom collaboration and teaching tools.
-- Enhance accessibility and mobile-device usability.
-- Expand testing, performance optimization, and deployment documentation.
+- More interactive educational models.
+- Better AI explanations and contextual help.
+- More classroom collaboration and teaching tools.
+- Improved accessibility and mobile usability.
+- Expanded automated testing and deployment documentation.
 
 ## 👨‍💻 Development
 
-This project is developed as an engineering major project focused on spatial computing, interactive 3D visualization, and AI-assisted education.
-
-Contributions, suggestions, and feedback are welcome.
+Built as an engineering major project focused on spatial computing, interactive 3D visualization and AI-assisted education. Feedback and contributions are welcome.
 
 ---
 
-**Built with React, Three.js, Node.js, and real-time collaboration technologies.**
+**Built with React, Three.js, Node.js and real-time collaboration technologies.**
